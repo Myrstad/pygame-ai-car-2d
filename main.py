@@ -1,87 +1,63 @@
 import pygame as pg
 from settings import * 
+from car import Car
 
-def rotate_point(point, center, degrees) -> tuple[int]:
-  p = pg.Vector2(point)
-  c = pg.Vector2(center)
-  p -= c
-  p = p.rotate(degrees)
-  p += c
-  return (p.x, p.y)
-  
+class Line(object):
+  def __init__(self, p1:tuple[int], p2:tuple[int], id=None) -> None:
+    self.p1 = p1
+    self.p2 = p2
+    self.id = id
 
+  def intercepts(self, other:object):
+    x1, y1 = self.p1
+    x2, y2 = self.p2
+    x3, y3 = other.p1
+    x4, y4 = other.p2
 
-class Car(object):
-  def __init__(self) -> None:
-    self.car_dim  = pg.Vector2(CAR_SIZE)
-    self.direction = pg.Vector2(1, 0)
-    self.center_position = pg.Vector2(SCREEN_SIZE[0]//2, SCREEN_SIZE[1]//2)
-    self.velocity = pg.Vector2(0, 0)
-    self.friction = 0.975
-
-  def draw(self, surface):
-    rotation = self.direction.angle_to(pg.Vector2(1,0)) # degrees
-    cpx = self.center_position.x
-    cpy = self.center_position.y
-    hw = self.car_dim[0] // 2
-    hh = self.car_dim[1] // 2
-    points = [(cpx-hw, cpy-hh), (cpx+hw, cpy-hh), (cpx+hw, cpy+hh), (cpx-hw, cpy+hh)] #tl, tr, br, bl
-
-    points = [rotate_point(p, self.center_position, -rotation) for p in points]
-
-    pg.draw.polygon(surface, RED, points)
-
-  def update(self, keys:dict):
-    if keys[pg.K_w] or keys[pg.K_UP]:
-      self.velocity += self.direction * 0.3
-    if keys[pg.K_s] or keys[pg.K_DOWN]:
-      self.velocity -= self.direction * 0.3
-    if keys[pg.K_a] or keys[pg.K_LEFT]:
-      self.direction = self.direction.rotate(-3)
-    if keys[pg.K_d] or keys[pg.K_RIGHT]:
-      self.direction = self.direction.rotate(3)
+    # calculate the distance to intersection point
+    uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
+    uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
     
-    self.velocity *= self.friction
+    # if uA and uB are between 0-1, lines are colliding
+    if (uA >= 0 and uA <= 1 and uB >= 0 and uB <= 1):
+      intersectionX = x1 + (uA * (x2-x1))
+      intersectionY = y1 + (uA * (y2-y1))
+      dist = ((intersectionX-x1)**2 + (intersectionY-y1)**2)**0.5
+      return (dist, (intersectionX, intersectionY))
+    return False
 
-    self.center_position += self.velocity
+if __name__ == '__main__':
+  pg.init()
+  screen = pg.display.set_mode(SCREEN_SIZE)
+  clock = pg.time.Clock()
 
-    #simple out of bounds check
-    if self.center_position.x < 0:
-      self.center_position.x = 0
-    if self.center_position.y < 0:
-      self.center_position.y = 0
-    if self.center_position.x > screen.get_width():
-      self.center_position.x = screen.get_width()
-    if self.center_position.y > screen.get_height():
-      self.center_position.y = screen.get_height()
+  velocity = pg.Vector2()
+  direction = pg.Vector2(0,1) #right
+  position = pg.Vector2(SCREEN_SIZE[0] // 2 - CAR_SIZE[0] // 2, SCREEN_SIZE[1] // 2 - CAR_SIZE[1] // 2)
+  friction = 0.975
 
+  car = Car()
 
-pg.init()
-screen = pg.display.set_mode(SCREEN_SIZE)
-clock = pg.time.Clock()
+  running = True
+  while running:
+    clock.tick(FPS)
 
-velocity = pg.Vector2()
-direction = pg.Vector2(0,1) #right
-position = pg.Vector2(SCREEN_SIZE[0] // 2 - CAR_SIZE[0] // 2, SCREEN_SIZE[1] // 2 - CAR_SIZE[1] // 2)
-friction = 0.975
+    for event in pg.event.get():
+      if event.type == pg.QUIT:
+        running = False
 
-car = Car()
+    keys_pressed = pg.key.get_pressed()
+    car.update(keys_pressed)
 
-running = True
-while running:
-  clock.tick(FPS)
+    #rendering
+    screen.fill(BLACK)
 
-  for event in pg.event.get():
-    if event.type == pg.QUIT:
-      running = False
+    car.draw(screen)
+    #update screen
+    pg.display.flip()
 
-  keys_pressed = pg.key.get_pressed()
-  car.update(keys_pressed)
+  pg.quit()
 
-  #rendering
-  screen.fill(BLACK)
-
-  car.draw(screen)
-  #update screen
-  pg.display.flip()
-  
+  l1 = Line((20,20), (530,360))
+  l2 = Line((210,240), (580,110))
+  print(l1.intercepts(l2))
