@@ -7,5 +7,9 @@ FPS = 60
 
 WHITE = (255, 255, 255)
 BLACK = (0  , 0  , 0  )
+GREY  = (127, 127, 127)
 RED   = (255, 0  , 0  )
 BLUE  = (0  , 0  , 255)
+GREEN = (127, 200, 63 )
+
+BACKGROUND_COLOR = GREEN
