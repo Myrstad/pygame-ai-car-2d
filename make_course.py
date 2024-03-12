@@ -11,8 +11,8 @@ screen = pg.display.set_mode(SCREEN_SIZE)
 p1 = None
 p2 = None
 figure_index = 0
-car = Car()
 env = Environment()
+car = Car(env, 110, 440)
 
 
 running = True
@@ -35,7 +35,7 @@ while running:
             txt += f'{line.p2},'
 
           prev_fig_idx = line.id
-        with open("environment.txt", 'w') as file:
+        with open("rewardgates.txt", 'w') as file:
           file.write(txt[:-1])
 
     if event.type == pg.MOUSEBUTTONDOWN:
@@ -49,7 +49,6 @@ while running:
         p1 = lines[-1].p2
   
   keys_pressed = pg.key.get_pressed()
-  car.draw(screen)
   car.update(keys_pressed)
   if keys_pressed[pg.K_SPACE]:
     p1 = None
@@ -61,9 +60,10 @@ while running:
     lines.clear()
     figure_index = 0
 
+  env.draw(screen)
+  car.draw(screen)
   for line in lines:
     pg.draw.line(screen, BLUE, line.p1, line.p2)
-  env.draw(screen)
   pg.display.flip()
 pg.quit()
 exit()

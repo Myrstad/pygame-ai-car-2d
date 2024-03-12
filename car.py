@@ -65,9 +65,9 @@ class Car(object):
     cpx = self.center_position[0] #center position x
     cpy = self.center_position[1] #center position y
     rotation = self.direction.angle_to(pg.Vector2(1,0)) # degrees
-    points = [(cpx-w//3, cpy), (cpx, cpy+cpy//4), (cpx+w//3, cpy)]
+    points = [(cpx, cpy-h//4), (cpx+w//3, cpy), (cpx, cpy+h//4)]
     points = [rotate_point(p, self.center_position, -rotation) for p in points]
-    pg.draw.lines(surface, BLACK, False, points)
+    pg.draw.lines(surface, BLACK, False, points, 3)
 
 
 

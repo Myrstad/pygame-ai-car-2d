@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     #rendering
     screen.fill(BACKGROUND_COLOR)
-    environment.draw(screen)
+    environment.draw(screen, debug=debugging)
     car.draw(screen, debug=debugging)
     #update screen
     pg.display.flip()
