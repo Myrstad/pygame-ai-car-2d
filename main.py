@@ -13,6 +13,7 @@ if __name__ == '__main__':
   direction = pg.Vector2(0,1) #right
   position = pg.Vector2(SCREEN_SIZE[0] // 2 - CAR_SIZE[0] // 2, SCREEN_SIZE[1] // 2 - CAR_SIZE[1] // 2)
   friction = 0.975
+  debugging = False
 
   environment = Environment()
   car = Car(environment, 110, 400)
@@ -24,6 +25,11 @@ if __name__ == '__main__':
     for event in pg.event.get():
       if event.type == pg.QUIT:
         running = False
+      if event.type == pg.KEYDOWN:
+        if event.key == pg.K_ESCAPE:
+          running = False
+        if event.key == pg.K_b:
+          debugging = not debugging
 
     keys_pressed = pg.key.get_pressed()
     car.update(keys_pressed)
@@ -31,7 +37,7 @@ if __name__ == '__main__':
     #rendering
     screen.fill(BACKGROUND_COLOR)
     environment.draw(screen)
-    car.draw(screen)
+    car.draw(screen, debug=debugging)
     #update screen
     pg.display.flip()
 

@@ -40,5 +40,6 @@ class Environment:
       pg.draw.line(screen, WHITE, line.p1, line.p2)
 
 if __name__ == '__main__':
+  """ Testing """
   e = Environment()
   # e.draw(None)
