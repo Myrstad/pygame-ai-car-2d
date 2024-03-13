@@ -26,6 +26,7 @@ class Car(object):
     self.crashed = False
     self.sensor_directions = [0, -20, 20, 45, -45, 90,-90, 135, -135, 180]
     self.sensor_distance = 200
+    self.current_reward_gate = 0
 
   def reset(self) -> None:
     self.crashed = False
@@ -110,16 +111,25 @@ class Car(object):
   
     self.center_position += self.velocity
 
-    # get points
+    # check environment collisions
     points = self.get_points()
     lines = Car.make_lines(points)
-
     for car_line in lines:
       for env_line in self.environment.lines:
         if car_line.intercepts(env_line) != False:
           self.crashed = True
+    
+    #check reward gates
+    for line in lines:
+      if self.environment.reward_gates[self.current_reward_gate].intercepts(line) != False:
+        print(self.current_reward_gate, end="   ")
+        self.current_reward_gate += 1
+        if self.current_reward_gate == len(self.environment.reward_gates):
+          self.current_reward_gate = 0
+        print(self.current_reward_gate)
+    
 
-    #simple out of bounds check
+    #simple out of bounds (window) check
     if self.center_position.x < 0:
       self.center_position.x = 0
     if self.center_position.y < 0:

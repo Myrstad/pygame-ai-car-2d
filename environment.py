@@ -27,11 +27,11 @@ class Environment:
     self.reward_gates: list[Line] = []
     with open(reward_path) as file:
       raw = file.read()
-    for gate in raw.split("\n"):
+    for id, gate in enumerate(raw.split("\n")):
       points = [x[1:].split(", ") for x in gate.split("),")]
       points=[tuple(map(int, x)) for x in points if len(x)!=1]
       p1,p2 = points
-      self.reward_gates.append(Line(p1, p2))
+      self.reward_gates.append(Line(p1, p2, id))
     
 
 
