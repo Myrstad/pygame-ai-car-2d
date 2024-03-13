@@ -17,13 +17,10 @@ class Environment:
           continue
         if index == 1:
           self.lines.append(Line(points[0], point))
-          print(points[-1], point)
         else:
-          print(self.lines[-1].p2, point)
           self.lines.append(Line(self.lines[-1].p2, point))
     
     # invisible reward gates
-    print("________________________")
     self.reward_gates: list[Line] = []
     with open(reward_path) as file:
       raw = file.read()

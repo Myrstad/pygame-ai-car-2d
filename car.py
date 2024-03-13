@@ -121,7 +121,7 @@ class Car(object):
     
     #check reward gates
     for line in lines:
-      if self.environment.reward_gates[self.current_reward_gate].intercepts(line) != False:
+      if self.environment.reward_gates[self.current_reward_gate].intercepts(line) != False and not self.crashed:
         print(self.current_reward_gate, end="   ")
         self.current_reward_gate += 1
         if self.current_reward_gate == len(self.environment.reward_gates):
