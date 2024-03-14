@@ -1,3 +1,20 @@
+"""
+## Neural Network (NN) implementation
+
+usage: 
+
+`net = Network()`
+
+`net.add(Dense(5, 7))`
+
+`net.add(ActivationLayer(ReLU))`
+
+`net.add(Dense(7, 2))`
+
+`net.add(ActivationLayer(sigmoid))`
+
+"""
+
 from .activation_functions import *
 from .dense import Dense
 from .activation_layer import ActivationLayer
@@ -9,7 +26,7 @@ if __name__ == '__main__':
   net.add(Dense(5, 7))
   net.add(ActivationLayer(ReLU))
   net.add(Dense(7, 2))
-  net.add(ActivationLayer(ReLU))
+  net.add(ActivationLayer(sigmoid))
   # print(net.forward([1,2,3,4,5]), type(net.forward([1,2,3,4,5])))
   # print(net.layers[0].input)
   # print(net.__dict__)
