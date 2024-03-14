@@ -45,7 +45,7 @@ class Car(object):
         line = Line(self.center_position, self.center_position + vector)
         pg.draw.line(surface, BLACK, line.p1, line.p2)
         intercepts = []
-        for env_line in self.environment.lines:
+        for env_line in self.environment.circuit_lines:
           if line.intercepts(env_line):
             intercepts.append(line.intercepts(env_line))
             # pg.draw.circle(surface, BLACK, line.intercepts(env_line)[1], 5)
@@ -115,7 +115,7 @@ class Car(object):
     points = self.get_points()
     lines = Car.make_lines(points)
     for car_line in lines:
-      for env_line in self.environment.lines:
+      for env_line in self.environment.circuit_lines:
         if car_line.intercepts(env_line) != False:
           self.crashed = True
     
