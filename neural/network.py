@@ -1,10 +1,11 @@
 import pickle
+import numpy as np
 from .dense import Dense
 from .activation_layer import ActivationLayer
 
 class Network:
   def __init__(self):
-    self.layers = []
+    self.layers: list[Dense|ActivationLayer] = []
   
   def add(self, layer):
     self.layers.append(layer)
@@ -16,6 +17,12 @@ class Network:
       output = layer.forward(output)
     return output
   
+  def mutate(self, mutation_rate:float):
+    """Apply mutation to the weights of the network"""
+    for layer in self.layers:
+      if isinstance(layer, Dense):
+        layer.mutate(mutation_rate)
+
   def save(self, filename):
     """Save network parameters to a file"""
     params = [{'type': type(layer).__name__, 'params': layer.get_params()} for layer in self.layers]

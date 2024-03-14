@@ -15,6 +15,12 @@ class Dense(Layer):
     self.output = np.dot(self.input, self.weights) + self.bias
     return self.output
   
+  def mutate(self, mutation_rate:float) -> None:
+    """Apply mutation to the weights and biases"""
+    print(self.weights)
+    self.weights += np.random.rand(*self.weights.shape) * mutation_rate
+    print(self.weights)
+  
   def get_params(self):
     """Return parameters for saving"""
     return {'weights': self.weights, 'bias': self.bias}
@@ -27,8 +33,9 @@ class Dense(Layer):
 if __name__ == '__main__':
   from .activation_functions import sigmoid
   d = Dense(1,1)
-  print(d.__dict__)
+  # print(d.__dict__)
   params = d.get_params()
   n = Dense(0,0)
   n.set_params(params)
-  print(n.__dict__)
+  # print(n.__dict__)
+  d.mutate(100)
