@@ -2,6 +2,7 @@ import pygame as pg
 from settings import * 
 from car import Car
 from environment import Environment
+import neural
 
 if __name__ == '__main__':
   pg.init()

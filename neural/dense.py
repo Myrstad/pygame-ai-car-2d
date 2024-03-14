@@ -14,3 +14,21 @@ class Dense(Layer):
     self.input = input_data
     self.output = np.dot(self.input, self.weights) + self.bias
     return self.output
+  
+  def get_params(self):
+    """Return parameters for saving"""
+    return {'weights': self.weights, 'bias': self.bias}
+
+  def set_params(self, params):
+    """Set parameters from loaded data"""
+    self.weights = params['weights']
+    self.bias = params['bias']
+
+if __name__ == '__main__':
+  from .activation_functions import sigmoid
+  d = Dense(1,1)
+  print(d.__dict__)
+  params = d.get_params()
+  n = Dense(0,0)
+  n.set_params(params)
+  print(n.__dict__)
