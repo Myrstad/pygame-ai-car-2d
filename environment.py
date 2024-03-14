@@ -1,3 +1,4 @@
+import json
 from settings import *
 import pygame as pg
 from line import Line
@@ -30,7 +31,20 @@ class Environment:
       p1,p2 = points
       self.reward_gates.append(Line(p1, p2, id))
     
-
+  def save(self, filename:str) -> None:
+    reward_line_points = [(x.p1, x.p2) for x in self.reward_gates]
+    circuit_line_points = [(x.p1, x.p2) for x in self.lines]
+    polygons = []
+    for polygon in self.polygons:
+      points = [x[1:].split(", ") for x in polygon.split("),")]
+      points = [tuple(map(int, x)) for x in points if len(x)!=1]
+      polygons.append(points)
+    print(reward_line_points)
+    print(circuit_line_points)
+    print(polygons)
+    params = {"reward": reward_line_points, "circuit": circuit_line_points, "polygons": polygons}
+    with open(filename, 'w') as f:
+      json.dump(params, f)
 
   
   def draw(self, screen, debug=True):
@@ -51,4 +65,5 @@ class Environment:
 if __name__ == '__main__':
   """ Testing """
   e = Environment()
+  e.save("models/circuit.json")
   # e.draw(None)
