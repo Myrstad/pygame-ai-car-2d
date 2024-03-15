@@ -28,6 +28,12 @@ class Car(object):
     self.sensor_distance = 200
     self.current_reward_gate = 0
 
+    # for AI
+    self.fitness = 0 # if crashed subtract a LOT of points. If pressing forward reward per frame. If hitting reward gate reward it a lot and on how long it took
+    self.frame_since_reward = 0
+    self.frames_survived = 0
+    self.activation_thresholds = [0.5, 0.8, 0.5, 0.5] #forwards, backwards, left, right: all in the range (0,1)
+
   def reset(self) -> None:
     self.crashed = False
     self.center_position.x = self.start_position[0]
@@ -35,7 +41,29 @@ class Car(object):
     self.direction.x = self.start_direction[0]
     self.direction.y = self.start_direction[1]
     self.velocity *= 0
+    self.fitness = 0
+    self.frame_since_reward = 0
+    self.frames_survived = 0
 
+  def get_neural_network_input(self) -> list[float|int]:
+    output = [] # velocity size, and all the distances to surroundings
+    output.append(round(self.velocity.length(), 2))
+    # check environment collisions
+    sensor_vectors = [self.direction.rotate(x)*self.sensor_distance for x in self.sensor_directions]
+    for vector in sensor_vectors:
+      line = Line(self.center_position, self.center_position + vector)
+      intercepts = []
+      for env_line in self.environment.circuit_lines:
+        if line.intercepts(env_line):
+          intercepts.append(line.intercepts(env_line))
+          # pg.draw.circle(surface, BLACK, line.intercepts(env_line)[1], 5)
+      
+      if len(intercepts) > 0:
+        intercepts.sort(key=lambda x: x[0])
+        output.append(round(intercepts[0][0], 2))
+      else:
+        output.append(self.sensor_distance)
+    return output
 
   def draw(self, surface, debug:bool = False):
     #draw "debug" lines
@@ -70,8 +98,6 @@ class Car(object):
     points = [rotate_point(p, self.center_position, -rotation) for p in points]
     pg.draw.lines(surface, BLACK, False, points, 3)
 
-
-
   def get_points(self) -> list[tuple[int]]:
     rotation = self.direction.angle_to(pg.Vector2(1,0)) # degrees
     cpx = self.center_position.x
@@ -94,10 +120,10 @@ class Car(object):
         lines.append(Line(lines[-1].p1, point))
     return lines
 
-
   def update(self, keys:dict):
     if (keys[pg.K_w] or keys[pg.K_UP]) and not self.crashed:
       self.velocity += self.direction * self.acceleration
+      self.fitness += 1
     if (keys[pg.K_s] or keys[pg.K_DOWN]) and not self.crashed:
       self.velocity -= self.direction * self.acceleration
     if (keys[pg.K_a] or keys[pg.K_LEFT]) and not self.crashed:
@@ -107,8 +133,8 @@ class Car(object):
     if keys[pg.K_r]:
       self.reset()
     
+    self.frame_since_reward += 1
     self.velocity *= self.friction
-  
     self.center_position += self.velocity
 
     # check environment collisions
@@ -117,17 +143,18 @@ class Car(object):
     for car_line in lines:
       for env_line in self.environment.circuit_lines:
         if car_line.intercepts(env_line) != False:
+          if not self.crashed:
+            self.fitness -= 100
           self.crashed = True
     
     #check reward gates
     for line in lines:
       if self.environment.reward_gates[self.current_reward_gate].intercepts(line) != False and not self.crashed:
-        print(self.current_reward_gate, end="   ")
         self.current_reward_gate += 1
         if self.current_reward_gate == len(self.environment.reward_gates):
           self.current_reward_gate = 0
-        print(self.current_reward_gate)
-    
+        self.fitness += max(int(10000 / self.frame_since_reward), 10)
+        self.frame_since_reward = 0
 
     #simple out of bounds (window) check
     if self.center_position.x < 0:
@@ -138,3 +165,6 @@ class Car(object):
       self.center_position.x = SCREEN_SIZE[0]
     if self.center_position.y > SCREEN_SIZE[1]:
       self.center_position.y = SCREEN_SIZE[1]
+
+if __name__ == '__main__':
+  c = Car()

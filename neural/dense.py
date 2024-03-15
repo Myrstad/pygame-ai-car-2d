@@ -17,9 +17,7 @@ class Dense(Layer):
   
   def mutate(self, mutation_rate:float) -> None:
     """Apply mutation to the weights and biases"""
-    print(self.weights)
     self.weights += np.random.rand(*self.weights.shape) * mutation_rate
-    print(self.weights)
   
   def get_params(self):
     """Return parameters for saving"""
