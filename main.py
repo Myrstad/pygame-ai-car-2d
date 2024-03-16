@@ -15,7 +15,7 @@ if __name__ == '__main__':
   friction = 0.975
   debugging = False
 
-  p = Population("main_test_1", size=100, learning_rate=100)
+  p = Population("main_test_4", size=100, learning_rate=0.1, trained_model="models/main_test_3.pkl")
 
   environment = Environment()
   # car = Car(environment, 110, 400)
@@ -50,12 +50,14 @@ if __name__ == '__main__':
     environment.draw(screen, debug=debugging)
     # car.draw(screen, debug=debugging)
     for c in p.cars:
-      c.draw(screen, debug=debugging)
+      c.draw(screen, debug=False)
     
     # if all cars are dead
     # print([car.crashed for car in p.cars].count(False))
     if [car.crashed for car in p.cars].count(False) == 0:
-      print([car.fitness for car in p.cars])
+      # print([car.fitness for car in p.cars])
+      # p.evolve()
+      [car.fitness for car in p.cars]
       p.evolve()
 
     #update screen

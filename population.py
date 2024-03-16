@@ -9,6 +9,7 @@ class Population:
     self.name = name
     self.size = size
     self.learning_rate = learning_rate
+    self.selection_ratio = 0.25
     self.generation = 0
     self.elites = 1
 
@@ -30,35 +31,40 @@ class Population:
 
     return population
 
+  def re_populate_with_mutation(self):
+    population_size = len(self.population)
+    times = self.size // population_size
+    new_population = []
+    for pop in self.population:
+      for i in range(times):
+        if i == 0:
+          new_population.append(pop)
+        else:
+          net = deepcopy(pop)
+          net.mutate(self.learning_rate)
+          new_population.append(net)
+    
+    return new_population
+
+  def get_fitnesses(self) -> list[int]:
+    return [car.fitness for car in self.cars]
+
   def selection(self) -> list[Network]:
     """Perform selection of parents based on their fitness"""
-    fitnesses = [car.fitness for car in self.cars]
-    # fitnesses = [np.random.randint(-100, 1000) for car in self.cars]
-    fitnesses = [x - min(fitnesses) + 1 for x in fitnesses] # in case of negative fitness
-    total_fitness = sum(fitnesses)
-
-    # Select top elites
-    sorted_indexes = np.argsort(fitnesses)[::-1]  # Sort indexes in descending order of fitness
-    elite_indexes = sorted_indexes[:self.elites]
-
-    # Perform roulette wheel selection for the rest
-    remaining_size = self.size - self.elites
-    roulette_indexes = np.random.choice(self.size, size=remaining_size, p=np.array(fitnesses) / total_fitness)
-    # Combine elite and roulette selections
-    selected_indexes = []
-    [selected_indexes.append(int(x)) for x in elite_indexes]
-    [selected_indexes.append(int(x)) for x in roulette_indexes]
-    return [deepcopy(self.population[i]) for i in selected_indexes]
+    number_of_selected = int(self.selection_ratio * len(self.population))
+    sorted_indices = np.argsort(self.get_fitnesses())[::-1]
+    selected_indices = sorted_indices[:number_of_selected]
+    selected_individuals = [self.population[i] for i in selected_indices]
+    return selected_individuals
 
   def evolve(self):
     self.generation += 1
+    
     self.population = self.selection()
-    self.save_network(self.population[0])
-    # print(self.population[0])
-    for i in range(self.elites, self.size):
-      self.population[i].mutate(self.learning_rate)
-    for car in self.cars:
-      car.reset()
+    self.population = self.re_populate_with_mutation()
+    self.save_network(self.population[0]) #hopefully
+    self.environment = Environment()
+    self.cars = [Car(self.environment, 110, 400, True) for _ in range(len(self.population))]
   
   def save_network(self, network:Network):
     network.save(f'models/{self.name}.pkl')
@@ -71,7 +77,7 @@ class Population:
 
 
 if __name__ == '__main__':
-  p = Population("test", size=100)
+  p = Population("test", size=12)
   p.evolve()
-  copy = Population("test", size=1, learning_rate=0, trained_model="models/test.pkl")
-  copy.evolve()
+  # copy = Population("test", size=4, learning_rate=0, trained_model="models/test.pkl")
+  # copy.evolve()

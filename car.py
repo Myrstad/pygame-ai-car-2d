@@ -171,7 +171,7 @@ class Car(object):
       for env_line in self.environment.circuit_lines:
         if car_line.intercepts(env_line) != False:
           if not self.crashed:
-            self.fitness -= 100
+            self.fitness -= 10
           self.crashed = True
     
     #check reward gates
