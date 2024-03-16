@@ -13,7 +13,7 @@ class Population:
     self.generation = 0
     self.elites = 1
 
-    self.environment: Environment = Environment("models/simple.json")
+    self.environment: Environment = Environment("models/simple_opp.json")
     self.cars: list[Car] = [Car(self.environment, True) for _ in range(size)] #all cars have a fitness attribute
     self.population: list[Network] = self.init_population()
     if trained_model:
@@ -60,6 +60,9 @@ class Population:
   def evolve(self):
     self.generation += 1
     
+    if self.learning_rate == 0:
+      self.cars = [Car(self.environment, True) for _ in range(len(self.population))]
+      return
     self.population = self.selection()
     self.population = self.re_populate_with_mutation()
     self.save_network(self.population[0]) #hopefully

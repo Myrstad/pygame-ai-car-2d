@@ -56,7 +56,7 @@ while running:
           points.append(line.p1)
         polygons.append(points)
         env.polygons = polygons
-        env.save("models/simple.json")
+        env.save("models/simple_opp.json")
 
     if event.type == pg.MOUSEBUTTONDOWN:
       if current_mode == "p":
