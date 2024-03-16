@@ -1,5 +1,6 @@
 from settings import *
-from main import Line, Car
+from line import Line
+from car import Car
 from environment import Environment
 import pygame as pg
 
