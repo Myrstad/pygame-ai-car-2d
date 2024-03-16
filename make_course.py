@@ -4,67 +4,101 @@ from car import Car
 from environment import Environment
 import pygame as pg
 
-lines: list[Line] = []
-
 pg.init()
 clock = pg.time.Clock()
 screen = pg.display.set_mode(SCREEN_SIZE)
-p1 = None
-p2 = None
-figure_index = 0
-env = Environment()
-car = Car(env, 110, 440)
+prev_mouse_position = None
+env = Environment(filename=None)
+car = Car(env)
+
+outer_lines: list[Line] = []
+inner_lines: list[Line] = []
+start_position = None
+point_from_start_towards_direction = None
+reward_gates: list[Line] = []
+
+current_mode: int | str = "p" # 1 (inner), 2(outer), "p"(start point), "d"(point to get direction, also need p), "m"(profit; reward gates)
 
 
 running = True
 while running:
   clock.tick(FPS)
-  screen.fill(BLACK)
+  screen.fill(BACKGROUND_COLOR)
   for event in pg.event.get():
     if event.type == pg.QUIT:
       running = False
     if event.type == pg.KEYDOWN:
-      if event.key == pg.K_z:
-        txt = ""
-        prev_fig_idx = 0
-        for line in lines:
-          idx = line.id
-          if idx != prev_fig_idx:
-            txt = txt[:-1]
-            txt += f'\n{line.p1},{line.p2},'
-          else:
-            txt += f'{line.p2},'
-
-          prev_fig_idx = line.id
-        with open("rewardgates.txt", 'w') as file:
-          file.write(txt[:-1])
+      if event.key == pg.K_p:
+        current_mode = "p"
+      if event.key == pg.K_d:
+        current_mode = "d"
+      if event.key == pg.K_m:
+        current_mode = "r"
+        prev_mouse_position = None
+      if event.key == pg.K_1:
+        current_mode = 1
+        prev_mouse_position = None
+      if event.key == pg.K_2:
+        current_mode = 2
+        prev_mouse_position = None
+      if event.key == pg.K_s:
+        polygons = []
+        points = []
+        for index, line in enumerate(outer_lines):
+          if index == 0:
+            points.append(line.p2)
+          points.append(line.p1)
+        polygons.append(points)
+        points = []
+        for index, line in enumerate(inner_lines):
+          if index == 0:
+            points.append(line.p2)
+          points.append(line.p1)
+        polygons.append(points)
+        env.polygons = polygons
+        env.save("models/simple.json")
 
     if event.type == pg.MOUSEBUTTONDOWN:
-      if not p1:
-        p1 = event.pos
-        print(p1)
-      else:
-        p2 = event.pos
-        lines.append(Line(p1, p2, figure_index))
-        print(p1, p2)
-        p1 = lines[-1].p2
-  
-  keys_pressed = pg.key.get_pressed()
-  car.update(keys_pressed)
-  if keys_pressed[pg.K_SPACE]:
-    p1 = None
-    p2 = None
-    figure_index += 1
-  if keys_pressed[pg.K_r]:
-    p1 = None
-    p2 = None
-    lines.clear()
-    figure_index = 0
+      if current_mode == "p":
+        start_position = event.pos
+        env.start_position = start_position
+        print(start_position)
+      if current_mode == 'd' and env.start_position:
+        point_from_start_towards_direction = event.pos
+        p1 = start_position
+        p2 = point_from_start_towards_direction
+        env.start_direction = pg.Vector2(p2[0]-p1[0], p2[1]-p1[1]).normalize()
+      if current_mode == 1:
+        if prev_mouse_position == None:
+          prev_mouse_position = event.pos
+          continue
+        outer_lines.append(Line(event.pos, prev_mouse_position))
+        prev_mouse_position = event.pos
+      if current_mode == 2:
+        if prev_mouse_position == None:
+          prev_mouse_position = event.pos
+          continue
+        inner_lines.append(Line(event.pos, prev_mouse_position))
+        prev_mouse_position = event.pos
+      if current_mode == "r":
+        if prev_mouse_position == None:
+          prev_mouse_position = event.pos
+          continue
+        reward_gates.append(Line(prev_mouse_position, event.pos))
+        prev_mouse_position = None
+          
 
-  env.draw(screen)
+  keys_pressed = pg.key.get_pressed()
+  env.circuit_lines = []
+  env.reward_gates = reward_gates
+  [env.circuit_lines.append(x) for x in inner_lines]
+  [env.circuit_lines.append(x) for x in outer_lines]
+  car.update(keys_pressed)
+  env.draw(screen, debug=True)
+  if point_from_start_towards_direction:
+    pg.draw.line(screen, WHITE, env.start_position, point_from_start_towards_direction, 2)
   car.draw(screen)
-  for line in lines:
-    pg.draw.line(screen, BLUE, line.p1, line.p2)
+
   pg.display.flip()
 pg.quit()
 exit()

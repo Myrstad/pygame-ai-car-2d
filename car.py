@@ -12,17 +12,17 @@ def rotate_point(point, center, degrees) -> tuple[int]:
   return (p.x, p.y)
 
 class Car(object):
-  def __init__(self, environment: Environment = Environment(), x=SCREEN_SIZE[0]//2, y=SCREEN_SIZE[1]//2, AI_powered=False) -> None:
+  def __init__(self, environment: Environment = Environment(), AI_powered=False) -> None:
+    self.environment = environment
     self.car_dim  = pg.Vector2(CAR_SIZE)
-    self.direction = pg.Vector2(0, 1)
-    self.start_position = (x, y)
-    self.start_direction = (0, 1)
-    self.center_position = pg.Vector2(x, y)
+    self.direction = pg.Vector2(environment.start_direction)
+    self.start_position = environment.start_position
+    self.start_direction = (self.direction.x, self.direction.y)
+    self.center_position = pg.Vector2(self.start_position)
     self.velocity = pg.Vector2(0, 0)
     self.friction = CAR_FRICTION
     self.acceleration = CAR_ACCELERATION
     self.turning_speed = CAR_TURNING_SPEED
-    self.environment = environment
     self.crashed = False
     self.sensor_directions = [0, -20, 20, 45, -45, 90,-90, 135, -135, 180]
     self.sensor_distance = 200
@@ -38,10 +38,10 @@ class Car(object):
 
   def reset(self) -> None:
     self.crashed = False
-    self.center_position.x = self.start_position[0]
-    self.center_position.y = self.start_position[1]
-    self.direction.x = self.start_direction[0]
-    self.direction.y = self.start_direction[1]
+    self.center_position.x = self.environment.start_position[0]
+    self.center_position.y = self.environment.start_position[1]
+    self.direction.x = self.environment.start_direction[0]
+    self.direction.y = self.environment.start_direction[1]
     self.velocity *= 0
     self.fitness = 0
     self.frame_since_reward = 0
@@ -176,6 +176,8 @@ class Car(object):
     
     #check reward gates
     for line in lines:
+      if len(self.environment.reward_gates) == 0:
+        continue
       if self.environment.reward_gates[self.current_reward_gate].intercepts(line) != False and not self.crashed:
         self.current_reward_gate += 1
         if self.current_reward_gate == len(self.environment.reward_gates):

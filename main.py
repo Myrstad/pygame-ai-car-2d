@@ -15,9 +15,9 @@ if __name__ == '__main__':
   friction = 0.975
   debugging = False
 
-  p = Population("main_test_4", size=100, learning_rate=0.1, trained_model="models/main_test_3.pkl")
+  p = Population("simple_test", size=100, learning_rate=0.1, trained_model=None)
 
-  environment = Environment()
+  environment = Environment("models/simple.json")
   # car = Car(environment, 110, 400)
 
   running = True

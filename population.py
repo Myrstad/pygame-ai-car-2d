@@ -13,8 +13,8 @@ class Population:
     self.generation = 0
     self.elites = 1
 
-    self.environment: Environment = Environment()
-    self.cars: list[Car] = [Car(self.environment, 110, 400, True) for _ in range(size)] #all cars have a fitness attribute
+    self.environment: Environment = Environment("models/simple.json")
+    self.cars: list[Car] = [Car(self.environment, True) for _ in range(size)] #all cars have a fitness attribute
     self.population: list[Network] = self.init_population()
     if trained_model:
       self.load_network(trained_model)
@@ -63,8 +63,8 @@ class Population:
     self.population = self.selection()
     self.population = self.re_populate_with_mutation()
     self.save_network(self.population[0]) #hopefully
-    self.environment = Environment()
-    self.cars = [Car(self.environment, 110, 400, True) for _ in range(len(self.population))]
+    # self.environment = Environment()
+    self.cars = [Car(self.environment, True) for _ in range(len(self.population))]
   
   def save_network(self, network:Network):
     network.save(f'models/{self.name}.pkl')
