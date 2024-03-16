@@ -12,7 +12,7 @@ def rotate_point(point, center, degrees) -> tuple[int]:
   return (p.x, p.y)
 
 class Car(object):
-  def __init__(self, environment: Environment = Environment(), x=SCREEN_SIZE[0]//2, y=SCREEN_SIZE[1]//2) -> None:
+  def __init__(self, environment: Environment = Environment(), x=SCREEN_SIZE[0]//2, y=SCREEN_SIZE[1]//2, AI_powered=False) -> None:
     self.car_dim  = pg.Vector2(CAR_SIZE)
     self.direction = pg.Vector2(0, 1)
     self.start_position = (x, y)
@@ -29,9 +29,11 @@ class Car(object):
     self.current_reward_gate = 0
 
     # for AI
+    self.ai_powered = AI_powered
     self.fitness = 0 # if crashed subtract a LOT of points. If pressing forward reward per frame. If hitting reward gate reward it a lot and on how long it took
     self.frame_since_reward = 0
     self.frames_survived = 0
+    self.maximum_frames = FPS * 15 * 1 # 15 seconds, assumes consistant FPS
     self.activation_thresholds = [0.5, 0.8, 0.5, 0.5] #forwards, backwards, left, right: all in the range (0,1)
 
   def reset(self) -> None:
@@ -120,20 +122,45 @@ class Car(object):
         lines.append(Line(lines[-1].p1, point))
     return lines
 
-  def update(self, keys:dict):
+  def human_control(self, keys:dict):
     if (keys[pg.K_w] or keys[pg.K_UP]) and not self.crashed:
       self.velocity += self.direction * self.acceleration
-      self.fitness += 1
+      # self.fitness += 1
     if (keys[pg.K_s] or keys[pg.K_DOWN]) and not self.crashed:
       self.velocity -= self.direction * self.acceleration
     if (keys[pg.K_a] or keys[pg.K_LEFT]) and not self.crashed:
       self.direction = self.direction.rotate(-self.turning_speed)
     if (keys[pg.K_d] or keys[pg.K_RIGHT]) and not self.crashed:
       self.direction = self.direction.rotate(self.turning_speed)
+  
+  def ai_control(self, list:list):
+    for index, value in enumerate(self.activation_thresholds):
+      if list[index] < value:
+        continue
+      #threshold is met
+      if index == 0 and not self.crashed:
+        self.velocity += self.direction * self.acceleration
+        # self.fitness += 1
+      if index == 1 and not self.crashed:
+        self.velocity -= self.direction * self.acceleration
+      if index == 2 and not self.crashed:
+        self.direction = self.direction.rotate(-self.turning_speed)
+      if index == 3 and not self.crashed:
+        self.direction = self.direction.rotate(self.turning_speed)
+
+  def update(self, keys:dict, ai:list=[0.5,0,0,0]):
+    if not self.ai_powered:
+      self.human_control(keys)
+    else:
+      self.ai_control(ai)
+      if self.frames_survived > self.maximum_frames:
+        self.crashed = True
+    
     if keys[pg.K_r]:
       self.reset()
-    
+
     self.frame_since_reward += 1
+    self.frames_survived += 1
     self.velocity *= self.friction
     self.center_position += self.velocity
 
@@ -153,7 +180,7 @@ class Car(object):
         self.current_reward_gate += 1
         if self.current_reward_gate == len(self.environment.reward_gates):
           self.current_reward_gate = 0
-        self.fitness += max(int(10000 / self.frame_since_reward), 10)
+        self.fitness += 110
         self.frame_since_reward = 0
 
     #simple out of bounds (window) check

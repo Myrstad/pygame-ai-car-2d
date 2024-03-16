@@ -2,7 +2,7 @@ import pygame as pg
 from settings import * 
 from car import Car
 from environment import Environment
-import neural
+from population import Population
 
 if __name__ == '__main__':
   pg.init()
@@ -15,8 +15,10 @@ if __name__ == '__main__':
   friction = 0.975
   debugging = False
 
+  p = Population("main_test_1", size=100, learning_rate=100)
+
   environment = Environment()
-  car = Car(environment, 110, 400)
+  # car = Car(environment, 110, 400)
 
   running = True
   while running:
@@ -30,14 +32,32 @@ if __name__ == '__main__':
           running = False
         if event.key == pg.K_b:
           debugging = not debugging
+        if event.key == pg.K_k:
+          for car in p.cars:
+            car.crashed = True
 
     keys_pressed = pg.key.get_pressed()
-    car.update(keys_pressed)
+    # car.update(keys_pressed)
+
+    for index, c in enumerate(p.cars):
+      if not c.crashed:
+        c.update(keys_pressed, [float(x) for x in p.population[index].forward(c.get_neural_network_input())[0]])
+      else:
+        c.update(keys_pressed)
 
     #rendering
     screen.fill(BACKGROUND_COLOR)
     environment.draw(screen, debug=debugging)
-    car.draw(screen, debug=debugging)
+    # car.draw(screen, debug=debugging)
+    for c in p.cars:
+      c.draw(screen, debug=debugging)
+    
+    # if all cars are dead
+    # print([car.crashed for car in p.cars].count(False))
+    if [car.crashed for car in p.cars].count(False) == 0:
+      print([car.fitness for car in p.cars])
+      p.evolve()
+
     #update screen
     pg.display.flip()
 
