@@ -158,6 +158,9 @@ class Car(object):
     
     if keys[pg.K_r]:
       self.reset()
+    
+    if not self.crashed:
+      self.fitness += self.direction.dot(self.direction)
 
     self.frame_since_reward += 1
     self.frames_survived += 1
@@ -171,7 +174,7 @@ class Car(object):
       for env_line in self.environment.circuit_lines:
         if car_line.intercepts(env_line) != False:
           if not self.crashed:
-            self.fitness -= 10
+            self.fitness -= 50
           self.crashed = True
     
     #check reward gates

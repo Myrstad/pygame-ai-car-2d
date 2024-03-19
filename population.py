@@ -13,7 +13,7 @@ class Population:
     self.generation = 0
     self.elites = 1
 
-    self.environment: Environment = Environment("models/simple_opp.json")
+    self.environment: Environment = Environment("models/snake.json")
     self.cars: list[Car] = [Car(self.environment, True) for _ in range(size)] #all cars have a fitness attribute
     self.population: list[Network] = self.init_population()
     if trained_model:
