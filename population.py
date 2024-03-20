@@ -73,11 +73,11 @@ class Population:
     network.save(f'models/{self.name}.pkl')
   
   def load_network(self, filename):
-    self.population.pop()
+    self.population.clear()
     net = Network()
     net.load(filename)
-    self.population.insert(0, net)
-
+    self.population.append(net)
+    self.population = self.re_populate_with_mutation()
 
 if __name__ == '__main__':
   p = Population("test", size=12)
