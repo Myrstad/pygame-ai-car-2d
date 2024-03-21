@@ -1,10 +1,26 @@
 class Line(object):
-  def __init__(self, p1:tuple[int], p2:tuple[int], id=None) -> None:
+  """Line class for mainly checking intercepts between lines"""
+  def __init__(self, p1: tuple[int], p2: tuple[int], id: str = None) -> None:
+    """__init__ uses points to save a Line
+
+    Args:
+        p1 (tuple[int]): first point 1
+        p2 (tuple[int]): point 2
+        id (str, optional): Identification. Defaults to None.
+    """
     self.p1 = p1
     self.p2 = p2
     self.id = id
 
-  def intercepts(self, second_line:object):
+  def intercepts(self, second_line: object):
+    """intercepts other line check
+
+    Args:
+        second_line (Line)
+
+    Returns:
+        tuple[float, tuple[float, float]]: distance, intercept point
+    """
     x1, y1 = self.p1
     x2, y2 = self.p2
     x3, y3 = second_line.p1

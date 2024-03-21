@@ -5,7 +5,21 @@ from neural import Network, Dense, ActivationLayer, sigmoid, ReLU
 import numpy as np
 
 class Population:
-  def __init__(self, name, *, size=100, learning_rate=0.1, trained_model=None) -> None:
+  """Population class for storing neural networks with cars they control.
+  
+  Used for creating better and better neural networks for the circuits.
+  Keeps track of generation and the best networks for each generation to
+  a save file. That can later be loaded. 
+  """
+  def __init__(self, name: str, *, size: int = 100, learning_rate: float = 0.1, trained_model: str = None) -> None:
+    """__init__ Population
+
+    Args:
+        name (str): name of population and used for saving model
+        size (int, optional): population size. Defaults to 100.
+        learning_rate (float, optional): max amount of possible change per gen. Defaults to 0.1.
+        trained_model (str, optional): Loading in previous network. Defaults to None.
+    """
     self.name = name
     self.size = size
     self.learning_rate = learning_rate
@@ -19,7 +33,12 @@ class Population:
     if trained_model:
       self.load_network(trained_model)
   
-  def init_population(self):
+  def init_population(self) -> list[Network]:
+    """init_population to a standard network
+
+    Returns:
+        list[Network]: starting population
+    """
     population = [Network() for _ in range(self.size)]
     for network in population:
       network.add(Dense(len(self.cars[0].get_neural_network_input()),8))
@@ -31,7 +50,12 @@ class Population:
 
     return population
 
-  def re_populate_with_mutation(self):
+  def re_populate_with_mutation(self) -> list[Network]:
+    """re_populate_with_mutation
+
+    Returns:
+        list[Network]: next generation population
+    """
     population_size = len(self.population)
     times = self.size // population_size
     new_population = []
@@ -47,17 +71,27 @@ class Population:
     return new_population
 
   def get_fitnesses(self) -> list[int]:
+    """get_fitnesses
+
+    Returns:
+        list[int]: all the fitnesses connected to the cars
+    """
     return [car.fitness for car in self.cars]
 
   def selection(self) -> list[Network]:
-    """Perform selection of parents based on their fitness"""
+    """selection of "parents" based on their fitness
+
+    Returns:
+        list[Network]: The best performing networks
+    """
     number_of_selected = int(self.selection_ratio * len(self.population))
     sorted_indices = np.argsort(self.get_fitnesses())[::-1]
     selected_indices = sorted_indices[:number_of_selected]
     selected_individuals = [self.population[i] for i in selected_indices]
     return selected_individuals
 
-  def evolve(self):
+  def evolve(self) -> None:
+    """evolve to get the next population, saves if learning rate != 0"""
     self.generation += 1
     
     if self.learning_rate == 0:
@@ -69,10 +103,20 @@ class Population:
     # self.environment = Environment()
     self.cars = [Car(self.environment, True) for _ in range(len(self.population))]
   
-  def save_network(self, network:Network):
+  def save_network(self, network:Network) -> None:
+    """save_network
+
+    Args:
+        network (Network): should be the best performing network
+    """
     network.save(f'models/{self.name}.pkl')
   
-  def load_network(self, filename):
+  def load_network(self, filename: str) -> None:
+    """load_network and use it as a baseline for the population
+
+    Args:
+        filename (str): filename with path to saved network
+    """
     self.population.clear()
     net = Network()
     net.load(filename)

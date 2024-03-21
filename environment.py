@@ -4,7 +4,13 @@ import pygame as pg
 from line import Line
 
 class Environment:
+  """Environment class for saving and loading circuit"""
   def __init__(self, filename="models/circuit.json") -> None:
+    """__init__ environment from file
+
+    Args:
+        filename (str, optional): File with path for saved environment. Defaults to "models/circuit.json".
+    """
     self.circuit_lines: list[Line] = []
     self.reward_gates: list[Line] = []
     self.polygons: list = []
@@ -14,11 +20,17 @@ class Environment:
       self.load(filename)
   
   def reset(self):
+    """reset car"""
     self.circuit_lines = []
     self.reward_gates = []
     self.polygons = []
 
-  def save(self, filename:str) -> None:
+  def save(self, filename: str) -> None:
+    """save environment to file
+
+    Args:
+        filename (str): filename with path to save environment to
+    """
     reward_line_points = [(x.p1, x.p2) for x in self.reward_gates]
     circuit_line_points = [(x.p1, x.p2) for x in self.circuit_lines]
     polygons = self.polygons
@@ -28,7 +40,12 @@ class Environment:
     with open(filename, 'w') as f:
       json.dump(params, f, indent=2)
 
-  def load(self, filename:str) -> None:
+  def load(self, filename: str) -> None:
+    """load environment from file
+
+    Args:
+        filename (str): filename with path to load environment from
+    """
     with open(filename, 'r') as f:
       params: dict = json.load(f)
     self.reward_gates = [Line(x[0], x[1]) for x in params.get("reward")]
@@ -39,7 +56,13 @@ class Environment:
     if params.get("position"):
       self.start_position = params.get("position")
   
-  def draw(self, screen, debug=True):
+  def draw(self, screen: pg.Surface, debug: bool = True):
+    """draw environment
+
+    Args:
+        screen (pg.Surface): surface to draw to
+        debug (bool, optional): Draws debug info, mainly reward gates. Defaults to True.
+    """
     for index, polygon in enumerate(self.polygons):
       clr = GREY if index == 0 else BACKGROUND_COLOR
       pg.draw.polygon(screen, clr, polygon)

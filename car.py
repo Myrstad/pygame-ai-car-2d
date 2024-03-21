@@ -12,7 +12,14 @@ def rotate_point(point, center, degrees) -> tuple[int]:
   return (p.x, p.y)
 
 class Car(object):
+  """Car class"""
   def __init__(self, environment: Environment = Environment(), AI_powered=False) -> None:
+    """__init__ Car class with options for environment and AI powered
+
+    Args:
+        environment (Environment, optional): The environment (circuit) the car drives in. Defaults to Environment().
+        AI_powered (bool, optional): If the car is ai powered. Defaults to False.
+    """
     self.environment = environment
     self.car_dim  = pg.Vector2(CAR_SIZE)
     self.direction = pg.Vector2(environment.start_direction)
@@ -37,6 +44,7 @@ class Car(object):
     self.activation_thresholds = [0.5, 0.8, 0.5, 0.5] #forwards, backwards, left, right: all in the range (0,1)
 
   def reset(self) -> None:
+    """reset all the cars attributes"""
     self.crashed = False
     self.center_position.x = self.environment.start_position[0]
     self.center_position.y = self.environment.start_position[1]
@@ -48,6 +56,11 @@ class Car(object):
     self.frames_survived = 0
 
   def get_neural_network_input(self) -> list[float|int]:
+    """get_neural_network_input for the neural networks input
+
+    Returns:
+        list[float|int]: gets the cars velocity and distances to the walls around the car
+    """
     output = [] # velocity size, and all the distances to surroundings
     output.append(round(self.velocity.length(), 2))
     # check environment collisions
@@ -67,7 +80,13 @@ class Car(object):
         output.append(self.sensor_distance)
     return output
 
-  def draw(self, surface, debug:bool = False):
+  def draw(self, surface: pg.Surface, debug: bool = False) -> None:
+    """draw car to surface, optionally debug information
+
+    Args:
+        surface (pg.Surface): surface to draw the car on
+        debug (bool, optional): if extra information should be drawn. Defaults to False.
+    """
     #draw "debug" lines
     if debug:
       sensor_vectors = [self.direction.rotate(x)*self.sensor_distance for x in self.sensor_directions]
@@ -101,6 +120,11 @@ class Car(object):
     pg.draw.lines(surface, BLACK, False, points, 3)
 
   def get_points(self) -> list[tuple[int]]:
+    """get_points of the corners of car
+
+    Returns:
+        list[tuple[int]]: corner positions of car
+    """
     rotation = self.direction.angle_to(pg.Vector2(1,0)) # degrees
     cpx = self.center_position.x
     cpy = self.center_position.y
@@ -114,6 +138,14 @@ class Car(object):
   
   @staticmethod
   def make_lines(points:list[tuple[int]]) -> list[Line]:
+    """make_lines for points in Car
+
+    Args:
+        points (list[tuple[int]]): points of corners (of car)
+
+    Returns:
+        list[Line]: lines of the cars edges (corner to corner)
+    """
     lines: list[Line] = []
     for index, point in enumerate(points):
       if index == 0:
@@ -122,7 +154,12 @@ class Car(object):
         lines.append(Line(lines[-1].p1, point))
     return lines
 
-  def human_control(self, keys:dict):
+  def human_control(self, keys:dict) -> None:
+    """human_control for when using keyboard to control car
+
+    Args:
+        keys (dict): all of the keys held down
+    """
     if (keys[pg.K_w] or keys[pg.K_UP]) and not self.crashed:
       self.velocity += self.direction * self.acceleration
       # self.fitness += 1
@@ -133,7 +170,12 @@ class Car(object):
     if (keys[pg.K_d] or keys[pg.K_RIGHT]) and not self.crashed:
       self.direction = self.direction.rotate(self.turning_speed)
   
-  def ai_control(self, list:list):
+  def ai_control(self, list:list) -> None:
+    """ai_control for when AI is controlling the car
+
+    Args:
+        list (list): list of floats [0,1] of if the car should accelerate or turn
+    """
     for index, value in enumerate(self.activation_thresholds):
       if list[index] < value:
         continue
@@ -148,7 +190,13 @@ class Car(object):
       if index == 3 and not self.crashed:
         self.direction = self.direction.rotate(self.turning_speed)
 
-  def update(self, keys:dict, ai:list=[0.5,0,0,0]):
+  def update(self, keys:dict, ai:list=[0.5,0,0,0]) -> None:
+    """update the cars position, fitness w/ controls
+
+    Args:
+        keys (dict): human controlled/pressed keys mainly for human controls
+        ai (list, optional): for if the car is AI-powered. Defaults to [0.5,0,0,0].
+    """
     if not self.ai_powered:
       self.human_control(keys)
     else:
