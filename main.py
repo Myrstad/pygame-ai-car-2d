@@ -4,7 +4,7 @@ from car import Car
 from environment import Environment
 from population import Population
 
-if __name__ == '__main__':
+def main():
   pg.init()
   screen = pg.display.set_mode(SCREEN_SIZE)
   clock = pg.time.Clock()
@@ -64,3 +64,6 @@ if __name__ == '__main__':
     pg.display.flip()
 
   pg.quit()
+
+if __name__ == '__main__':
+  main()
