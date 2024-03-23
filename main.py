@@ -1,6 +1,5 @@
 import pygame as pg
 from settings import * 
-from car import Car
 from environment import Environment
 from population import Population
 
@@ -9,13 +8,9 @@ def main():
   screen = pg.display.set_mode(SCREEN_SIZE)
   clock = pg.time.Clock()
 
-  velocity = pg.Vector2()
-  direction = pg.Vector2(0,1) #right
-  position = pg.Vector2(SCREEN_SIZE[0] // 2 - CAR_SIZE[0] // 2, SCREEN_SIZE[1] // 2 - CAR_SIZE[1] // 2)
-  friction = 0.975
   debugging = False
 
-  p = Population("showcase", size=50, learning_rate=0.1)
+  p = Population("presentation", size=1, learning_rate=0, trained_model="models/showcase.pkl")
 
   environment = Environment("models/snake.json")
   # car = Car(environment, 110, 400)
