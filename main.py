@@ -10,9 +10,9 @@ def main():
 
   debugging = False
 
-  p = Population("presentation", size=1, learning_rate=0, trained_model="models/showcase.pkl")
+  p = Population(CURRENT_MODEL_NAME, size=POPULATION_SIZE, learning_rate=LEARNING_RATE, trained_model=TRAINED_MODEL_PATH)
 
-  environment = Environment("models/snake.json")
+  environment = Environment(ENVIRONMENT_PATH)
   # car = Car(environment, 110, 400)
 
   running = True

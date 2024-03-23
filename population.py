@@ -3,6 +3,7 @@ from environment import Environment
 from car import Car
 from neural import Network, Dense, ActivationLayer, sigmoid, ReLU
 import numpy as np
+from settings import ENVIRONMENT_PATH
 
 class Population:
   """Population class for storing neural networks with cars they control.
@@ -27,7 +28,7 @@ class Population:
     self.generation = 0
     self.elites = 1
 
-    self.environment: Environment = Environment("models/snake.json")
+    self.environment: Environment = Environment(ENVIRONMENT_PATH)
     self.cars: list[Car] = [Car(self.environment, True) for _ in range(size)] #all cars have a fitness attribute
     self.population: list[Network] = self.init_population()
     if trained_model:
