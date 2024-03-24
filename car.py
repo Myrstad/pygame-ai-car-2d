@@ -208,7 +208,7 @@ class Car(object):
       self.reset()
     
     if not self.crashed:
-      self.fitness += self.direction.dot(self.direction)
+      self.fitness += self.direction.dot(self.velocity)
 
     self.frame_since_reward += 1
     self.frames_survived += 1
@@ -233,7 +233,7 @@ class Car(object):
         self.current_reward_gate += 1
         if self.current_reward_gate == len(self.environment.reward_gates):
           self.current_reward_gate = 0
-        self.fitness += 110
+        self.fitness += 500
         self.frame_since_reward = 0
 
     #simple out of bounds (window) check

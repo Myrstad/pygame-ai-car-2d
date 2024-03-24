@@ -19,8 +19,8 @@ GREEN = (127, 200, 63 )
 BACKGROUND_COLOR = GREEN
 
 # Machine learning settings
-ENVIRONMENT_PATH = "models/circuit.json"
-TRAINED_MODEL_PATH = "models/showcasing.pkl"
-CURRENT_MODEL_NAME = "home-testing"
-LEARNING_RATE = 0.1 #0 is none, and does not save model
-POPULATION_SIZE = 100
+ENVIRONMENT_PATH = "models/simple_opp.json"
+TRAINED_MODEL_PATH = "models/simple_opp.pkl"
+CURRENT_MODEL_NAME = "circuit"
+LEARNING_RATE = 0 #0 is none, and does not save model
+POPULATION_SIZE = 1

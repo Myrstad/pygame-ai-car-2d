@@ -3,7 +3,8 @@ from environment import Environment
 from car import Car
 from neural import Network, Dense, ActivationLayer, sigmoid, ReLU
 import numpy as np
-from settings import ENVIRONMENT_PATH
+import pygame as pg
+from settings import ENVIRONMENT_PATH, BLACK
 
 class Population:
   """Population class for storing neural networks with cars they control.
@@ -27,6 +28,7 @@ class Population:
     self.selection_ratio = 0.25
     self.generation = 0
     self.elites = 1
+    self.prev_best = None
 
     self.environment: Environment = Environment(ENVIRONMENT_PATH)
     self.cars: list[Car] = [Car(self.environment, True) for _ in range(size)] #all cars have a fitness attribute
@@ -94,6 +96,7 @@ class Population:
   def evolve(self) -> None:
     """evolve to get the next population, saves if learning rate != 0"""
     self.generation += 1
+    self.prev_best = max([int(car.fitness) for car in self.cars])
     
     if self.learning_rate == 0:
       self.cars = [Car(self.environment, True) for _ in range(len(self.population))]
@@ -123,6 +126,16 @@ class Population:
     net.load(filename)
     self.population.append(net)
     self.population = self.re_populate_with_mutation()
+  
+  def draw_debug_info(self, screen: pg.Surface) -> None:
+    font: pg.font.Font = pg.font.SysFont(None, 20)
+    current_best: pg.Surface = font.render(f'Current best fitness: {max([int(car.fitness) for car in self.cars])}', True, BLACK)
+    prev_best: pg.Surface = font.render(f'Previous best fitness: {self.prev_best}', True, BLACK)
+    current_generation: pg.Surface = font.render(f'Generation: {self.generation}', True, BLACK)
+    #draw to top lef
+    screen.blit(current_generation, (32, 32))
+    screen.blit(prev_best, (32, 32+20))
+    screen.blit(current_best, (32, 32+20*2))
 
 if __name__ == '__main__':
   p = Population("test", size=12)
